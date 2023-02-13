@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SwapButtonLogic : MonoBehaviour
 {
-    private string stringForListDetection = "";
+    [SerializeField] private string stringForListDetection = "";
 
     //scripts
     private GameManager _gameManager;
@@ -17,23 +17,42 @@ public class SwapButtonLogic : MonoBehaviour
     }
 
     public void SwapMonstersInSelectedBoxes()
-    {
+    { 
+        int tempIndex = FindIndexInList(_gameManager.selectedBoxesList[0]);
+        int tempIndex2;
+        GameObject tempObject;
+        Vector2 tempVector;
         //swap indexes 
-        if(stringForListDetection == "army1")
+        if (stringForListDetection == "army1")
         {
-            GameObject tempIndex = _gameManager.Army1List[FindIndexInList(_gameManager.selectedBoxesList[0])];
-            _gameManager.selectedBoxesList[0] = _gameManager.Army1List[FindIndexInList(_gameManager.selectedBoxesList[1])];
-            _gameManager.selectedBoxesList[1] = tempIndex;
+            tempObject = _gameManager.Army1List[tempIndex];            
+            tempIndex2 = FindIndexInList(_gameManager.selectedBoxesList[1]);
+            if (stringForListDetection == "army1")
+            {
+                _gameManager.Army1List[tempIndex] = _gameManager.Army1List[tempIndex2];               
+                _gameManager.Army1List[tempIndex2] = tempObject;
+                
+                //utworzyæ jakiœ prefab w obiektu jednego dziecka obiektu listy, a nastêpnie wrzuciæ w jego miejsce drugi index, i to samo z pierwszym
+                //po zamianie miejscami jako dzieci wszystko œmiga
+            }
+            else if(stringForListDetection == "army2")
+            {
+                _gameManager.selectedBoxesList[0] = _gameManager.Army2List[tempIndex];
+                _gameManager.selectedBoxesList[1] = tempObject;
+            }
         }
         else if(stringForListDetection == "army2")
         {
-            GameObject tempIndex = _gameManager.Army2List[FindIndexInList(_gameManager.selectedBoxesList[0])];
+            stringForListDetection = "";
+            if (stringForListDetection == "army1")
+            {
+
+            }
+            else
+            {
+
+            }
         }
-        //swap postion
-        Vector2 tempObject;
-        tempObject = _gameManager.selectedBoxesList[0].transform.position;
-        _gameManager.selectedBoxesList[0].transform.position = _gameManager.selectedBoxesList[1].transform.position;
-        _gameManager.selectedBoxesList[1].transform.position = tempObject;
     }
 
     public int FindIndexInList(GameObject gameObject)
