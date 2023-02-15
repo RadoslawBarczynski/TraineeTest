@@ -5,6 +5,21 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
+/*
+ *  all statements scenario:
+ *  
+ *  {legend: 0 - empty slot, x1 & x2 - monsters slots, S - selected slot where we want to change}
+ *  
+ *  - changing x1 monsters in single army and both
+ *  - changing x2 monsters in single army and both
+ *  - changing when x1 x2 x2 0 0 0 -> x2 x2 x1 0 0 0 
+ *  - changing when 0 0 0 x2 x2 x1 -> 0 0 0 x1 x2 x2
+ *  - changing x2 monster into this situation 0 S x2 x2 0 0 -> 0 x2 x2 x2 x2 0
+ * 
+ * 
+ * 
+ * 
+*/
 public class SwapButtonLogic : MonoBehaviour
 {
     [SerializeField] private string stringForListDetection = "";
@@ -12,12 +27,10 @@ public class SwapButtonLogic : MonoBehaviour
 
     //scripts
     private GameManager _gameManager;
-    private BigMonstersLogic _bigMonstersLogic;
 
     void Start()
     {
         _gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
-        _bigMonstersLogic = GameObject.FindGameObjectWithTag("GameManager").GetComponent<BigMonstersLogic>();
     }
 
     public void SwapMonstersInSelectedBoxes()
@@ -51,16 +64,9 @@ public class SwapButtonLogic : MonoBehaviour
                     SwapFunctionForBigMonster(tempIndex, tempIndex2, tempObject, _gameManager.Army1List);
                 }
             }
-            else if(stringForListDetection == "army2")
+            else if(stringForListDetection == "army2") //if first selection is in army1 and second in army2
             {
-                if(!CheckMonstersToSwap(tempIndex, tempIndex2)) //do when only small monsters are selected
-                {
-                    SwapParents(tempIndex, tempIndex2, _gameManager.Army1List, _gameManager.Army2List);
-                }
-                else //do when Big monster is selected
-                {
-                    Debug.Log("for army 1 " + CheckMonstersToSwap(tempIndex, tempIndex2));
-                }
+                SwapParents(tempIndex, tempIndex2, _gameManager.Army1List, _gameManager.Army2List);
             }
         }
 
@@ -89,38 +95,29 @@ public class SwapButtonLogic : MonoBehaviour
                     SwapFunctionForBigMonster(tempIndex, tempIndex2, tempObject, _gameManager.Army2List);
                 }
             }
-            else if (stringForListDetection == "army1")
+            else if (stringForListDetection == "army1") //if first selection is in army2 and second in army1
             {
-                if (!CheckMonstersToSwap(tempIndex, tempIndex2)) //do when only small monsters are selected
-                {
-                    SwapParents(tempIndex2, tempIndex, _gameManager.Army1List, _gameManager.Army2List);
-                }
-                else //do when Big monster is selected
-                {
-                    Debug.Log(tempIndex);
-                    Debug.Log(tempIndex2);
-                    Debug.Log("for army 2 " + CheckMonstersToSwap(tempIndex, tempIndex2));
-                }
+                SwapParents(tempIndex2, tempIndex, _gameManager.Army1List, _gameManager.Army2List);
             }
         }
     }
 
     //------------------------Swap function for one army-------------------------- 
+
     public void SwapFunctionForBigMonster(int index1, int index2, GameObject gameObject, List<GameObject> list)
     {
         if (index1 + 1 <= 5 && index2 + 1 <= 5)
-        {
-            //if two elements are big monsters
+        {            
             if (list[index1 + 1].GetComponent<OnClickHandler>().enabled == false &&
-                list[index2 + 1].GetComponent<OnClickHandler>().enabled == false ||
+                list[index2 + 1].GetComponent<OnClickHandler>().enabled == false || // ^ if two elements are big monsters
                 list[index1 + 1].GetComponent<OnClickHandler>().enabled == true &&
                 list[index2 + 1].GetComponent<OnClickHandler>().enabled == false &&
-                list[index1 + 1].GetComponent<OnClickHandler>().isBigMonsterHere == false ||
+                list[index1 + 1].GetComponent<OnClickHandler>().isBigMonsterHere == false || // ^ if one element is big monster in second selection
                 list[index1 + 1].GetComponent<OnClickHandler>().enabled == false &&
                 list[index2 + 1].GetComponent<OnClickHandler>().enabled == true &&
-                list[index2 + 1].GetComponent<OnClickHandler>().isBigMonsterHere == false)
+                list[index2 + 1].GetComponent<OnClickHandler>().isBigMonsterHere == false) // ^ if one element is big monster in first selection
             {
-                //-------------if x2 x2   x2 x2 example------------------------------------------------
+                //-------------if x2 x2   x2 x2 example------------------------------------------------               
 
                 //swap for selected slot
                 list[index1] = list[index2];
@@ -201,26 +198,98 @@ public class SwapButtonLogic : MonoBehaviour
 
     //------------------------Swap function for two armys-------------------------- 
     public void SwapParents(int index1, int index2, List<GameObject> list1, List<GameObject> list2)
-    {
+    {       
         //temporary object for slots migration
         GameObject tempForArmy1 = list1[index1];
         GameObject tempForArmy2 = list2[index2];
 
-        //swap parents
-        list1[index1].transform.SetParent(Army2Parent.transform);
-        list2[index2].transform.SetParent(Army1Parent.transform);
+        if (tempForArmy1.GetComponent<OnClickHandler>().isBigMonsterHere == false && tempForArmy2.GetComponent<OnClickHandler>().isBigMonsterHere == false)
+        {
 
-        //remove duplications
-        list1.Remove(tempForArmy1);
-        list2.Remove(tempForArmy2);
+            //swap parents
+            list1[index1].transform.SetParent(Army2Parent.transform);
+            list2[index2].transform.SetParent(Army1Parent.transform);
 
-        //insert slots in their correct positions
-        list1.Insert(index1, tempForArmy2);
-        list2.Insert(index2, tempForArmy1);
+            //remove duplications
+            list1.Remove(tempForArmy1);
+            list2.Remove(tempForArmy2);
 
-        //move object to their positions
-        tempForArmy1.transform.SetSiblingIndex(index2);
-        tempForArmy2.transform.SetSiblingIndex(index1);
+            //insert slots in their correct positions
+            list1.Insert(index1, tempForArmy2);
+            list2.Insert(index2, tempForArmy1);
+
+            //move object to their positions
+            tempForArmy1.transform.SetSiblingIndex(index2);
+            tempForArmy2.transform.SetSiblingIndex(index1);
+        }        
+        else 
+        {
+            if (tempForArmy1.GetComponent<OnClickHandler>().isBigMonsterHere == true &&
+                tempForArmy2.GetComponent<OnClickHandler>().isBigMonsterHere == false &&
+                list2[index2 + 1].GetComponent<OnClickHandler>().isBigMonsterHere == true) //migration x2 from army1 to army2 without space
+            {
+                if(index2 + 3 <= 5) //check if u are still in list indexes
+                {
+                    if(index2 + 4 <= 5)  //check if the situation is 0 S x2 x2 x1 0 if yes move all one index to the right
+                    {
+                        SwapInOneList(list2, index2 + 3, index2 + 4);
+                    }
+                    SwapInOneList(list2, index2 + 2, index2 + 3);
+                    SwapInOneList(list2, index2 + 1, index2 + 2);
+                }
+                else
+                {
+                    return; 
+                }
+            }
+            else if (tempForArmy1.GetComponent<OnClickHandler>().isBigMonsterHere == false &&
+                    tempForArmy2.GetComponent<OnClickHandler>().isBigMonsterHere == true &&
+                    list1[index1 + 1].GetComponent<OnClickHandler>().isBigMonsterHere == true) //migration x2 from army2 to army1 without space
+            {
+                if (index1 + 3 <= 5) //check if u are still in list indexes
+                {
+                    if (index1 + 4 <= 5) //check if the situation is 0 S x2 x2 x1 0 if yes move all one index to the right
+                    {
+                        SwapInOneList(list1, index1 + 3, index1 + 4);
+                    }
+                    SwapInOneList(list1, index1 + 2, index1 + 3);
+                    SwapInOneList(list1, index1 + 1, index1 + 2);
+                }
+                else
+                {
+                    return;
+                }
+            }
+            
+                //second slots of x2 monsters
+                GameObject tempForArmy1x1 = list1[index1 + 1];
+                GameObject tempForArmy2x1 = list2[index2 + 1];
+
+                //swap parents
+                list1[index1].transform.SetParent(Army2Parent.transform);
+                list1[index1 + 1].transform.SetParent(Army2Parent.transform);
+                list2[index2].transform.SetParent(Army1Parent.transform);
+                list2[index2 + 1].transform.SetParent(Army1Parent.transform);
+
+                //remove duplications
+                list1.Remove(tempForArmy1);
+                list1.Remove(tempForArmy1x1);
+                list2.Remove(tempForArmy2);
+                list2.Remove(tempForArmy2x1);
+
+                //insert slots in their correct positions
+                list2.Insert(index2, tempForArmy1x1);
+                list1.Insert(index1, tempForArmy2x1);
+                list1.Insert(index1, tempForArmy2);
+                list2.Insert(index2, tempForArmy1);
+
+                //move object to their positions
+                tempForArmy1x1.transform.SetSiblingIndex(index2);
+                tempForArmy2x1.transform.SetSiblingIndex(index1);
+                tempForArmy1.transform.SetSiblingIndex(index2);
+                tempForArmy2.transform.SetSiblingIndex(index1);
+        }
+        
     }
 
 
@@ -256,6 +325,15 @@ public class SwapButtonLogic : MonoBehaviour
             }
         }
         return -1;
+    }
+
+    public List<GameObject> SwapInOneList(List<GameObject> list, int i, int j)
+    {
+        GameObject temp = list[i];
+        list[i] = list[j];
+        list[j] = temp;
+
+        return list;
     }
 
 

@@ -49,6 +49,14 @@ public class GameManager : MonoBehaviour
                     _x2Btn.interactable = true;
                 }
             }
+            if(selectedBoxesList.Count == 2)
+            {
+                _swapBtn.interactable = true;
+            }
+            else
+            {
+                _swapBtn.interactable = false;
+            }
         }
     }
     
