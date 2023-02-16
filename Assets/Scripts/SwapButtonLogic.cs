@@ -12,18 +12,19 @@ using UnityEngine;
  *  
  *  - changing x1 monsters in single army and both
  *  - changing x2 monsters in single army and both
- *  - changing when x1 x2 x2 0 0 0 -> x2 x2 x1 0 0 0 
- *  - changing when 0 0 0 x2 x2 x1 -> 0 0 0 x1 x2 x2
+ *  - changing when x1 x2 x2 0 0 0 -> x2 x2 x1 0 0 0 (WORK ONLY IN ONE ARMY)
+ *  - changing when 0 0 0 x2 x2 x1 -> 0 0 0 x1 x2 x2 (WORK ONLY IN ONE ARMY)
  *  - changing x2 monster into this situation 0 S x2 x2 0 0 -> 0 x2 x2 x2 x2 0
  * 
- * 
+ *  MISSING
+ *  -some bugs that, when army is almost full, monsters are not swap correctly
  * 
  * 
 */
 public class SwapButtonLogic : MonoBehaviour
 {
-    [SerializeField] private string stringForListDetection = "";
-    [SerializeField] private GameObject Army1Parent, Army2Parent;
+    [SerializeField] private string _stringForListDetection = "";
+    [SerializeField] private GameObject _Army1Parent, _Army2Parent;
 
     //scripts
     private GameManager _gameManager;
@@ -43,11 +44,11 @@ public class SwapButtonLogic : MonoBehaviour
         //------------------logic if army 1 is selected first-----------------
 
 
-        if (stringForListDetection == "army1")  
+        if (_stringForListDetection == "army1")  
         {
             tempObject = _gameManager.Army1List[tempIndex];            
             tempIndex2 = FindIndexInList(_gameManager.selectedBoxesList[1]);
-            if (stringForListDetection == "army1")
+            if (_stringForListDetection == "army1")
             {
                 if(!CheckMonstersToSwap(tempIndex, tempIndex2)) //do when only small monsters are selected
                 {
@@ -64,7 +65,7 @@ public class SwapButtonLogic : MonoBehaviour
                     SwapFunctionForBigMonster(tempIndex, tempIndex2, tempObject, _gameManager.Army1List);
                 }
             }
-            else if(stringForListDetection == "army2") //if first selection is in army1 and second in army2
+            else if(_stringForListDetection == "army2") //if first selection is in army1 and second in army2
             {
                 SwapParents(tempIndex, tempIndex2, _gameManager.Army1List, _gameManager.Army2List);
             }
@@ -74,11 +75,11 @@ public class SwapButtonLogic : MonoBehaviour
         //------------------logic if army 2 is selected first-----------------
 
 
-        else if (stringForListDetection == "army2") 
+        else if (_stringForListDetection == "army2") 
         {
             tempObject = _gameManager.Army2List[tempIndex];
             tempIndex2 = FindIndexInList(_gameManager.selectedBoxesList[1]);
-            if (stringForListDetection == "army2")
+            if (_stringForListDetection == "army2")
             {
                 if (!CheckMonstersToSwap(tempIndex, tempIndex2)) //do when only small monsters are selected
                 {
@@ -95,7 +96,7 @@ public class SwapButtonLogic : MonoBehaviour
                     SwapFunctionForBigMonster(tempIndex, tempIndex2, tempObject, _gameManager.Army2List);
                 }
             }
-            else if (stringForListDetection == "army1") //if first selection is in army2 and second in army1
+            else if (_stringForListDetection == "army1") //if first selection is in army2 and second in army1
             {
                 SwapParents(tempIndex2, tempIndex, _gameManager.Army1List, _gameManager.Army2List);
             }
@@ -207,8 +208,8 @@ public class SwapButtonLogic : MonoBehaviour
         {
 
             //swap parents
-            list1[index1].transform.SetParent(Army2Parent.transform);
-            list2[index2].transform.SetParent(Army1Parent.transform);
+            list1[index1].transform.SetParent(_Army2Parent.transform);
+            list2[index2].transform.SetParent(_Army1Parent.transform);
 
             //remove duplications
             list1.Remove(tempForArmy1);
@@ -266,10 +267,10 @@ public class SwapButtonLogic : MonoBehaviour
                 GameObject tempForArmy2x1 = list2[index2 + 1];
 
                 //swap parents
-                list1[index1].transform.SetParent(Army2Parent.transform);
-                list1[index1 + 1].transform.SetParent(Army2Parent.transform);
-                list2[index2].transform.SetParent(Army1Parent.transform);
-                list2[index2 + 1].transform.SetParent(Army1Parent.transform);
+                list1[index1].transform.SetParent(_Army2Parent.transform);
+                list1[index1 + 1].transform.SetParent(_Army2Parent.transform);
+                list2[index2].transform.SetParent(_Army1Parent.transform);
+                list2[index2 + 1].transform.SetParent(_Army1Parent.transform);
 
                 //remove duplications
                 list1.Remove(tempForArmy1);
@@ -315,12 +316,12 @@ public class SwapButtonLogic : MonoBehaviour
         {
             if (_gameManager.Army1List[i] == gameObject)
             {
-                stringForListDetection = "army1";
+                _stringForListDetection = "army1";
                 return i;
             }
             else if (_gameManager.Army2List[i] == gameObject)
             {
-                stringForListDetection = "army2";
+                _stringForListDetection = "army2";
                 return i;
             }
         }
