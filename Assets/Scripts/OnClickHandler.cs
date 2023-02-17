@@ -22,6 +22,7 @@ public class OnClickHandler : MonoBehaviour, IPointerDownHandler
         GenerateSelectionBoxes();
     }
 
+    //auto selection boxes generation
     void GenerateSelectionBoxes()
     {
         _selectionObject = Instantiate(_selectionPrefab, transform.position, Quaternion.identity);

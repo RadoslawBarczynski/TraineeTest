@@ -14,9 +14,14 @@ public class BigMonstersLogic : MonoBehaviour
         _gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
     }
 
+    //validation for checking if selected boxes +1 index is empty
     public bool CheckIfBigMonsterCanBePlaced(GameObject SelectedBoxObject)
     {
         int indexOfSelectedSlot = SlotToIndex(SelectedBoxObject);
+        if(SelectedBoxObject.GetComponent<OnClickHandler>().isMonsterHere == true)
+        {
+            return false;
+        }
         if (indexOfSelectedSlot < _gameManager.Army1List.Count - 1)
         {
             if (choosenList == "army1")

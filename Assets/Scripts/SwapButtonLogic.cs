@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Assertions.Must;
 
 /*
  *  all statements scenario:
@@ -12,8 +13,8 @@ using UnityEngine;
  *  
  *  - changing x1 monsters in single army and both
  *  - changing x2 monsters in single army and both
- *  - changing when x1 x2 x2 0 0 0 -> x2 x2 x1 0 0 0 (WORK ONLY IN ONE ARMY)
- *  - changing when 0 0 0 x2 x2 x1 -> 0 0 0 x1 x2 x2 (WORK ONLY IN ONE ARMY)
+ *  - changing when x1 x2 x2 0 0 0 -> x2 x2 x1 0 0 0
+ *  - changing when 0 0 0 x2 x2 x1 -> 0 0 0 x1 x2 x2 
  *  - changing x2 monster into this situation 0 S x2 x2 0 0 -> 0 x2 x2 x2 x2 0
  * 
  *  MISSING
@@ -50,7 +51,7 @@ public class SwapButtonLogic : MonoBehaviour
             tempIndex2 = FindIndexInList(_gameManager.selectedBoxesList[1]);
             if (_stringForListDetection == "army1")
             {
-                if(!CheckMonstersToSwap(tempIndex, tempIndex2)) //do when only small monsters are selected
+                if(!CheckMonstersToSwap(tempIndex, tempIndex2, _gameManager.Army1List)) //do when only small monsters are selected
                 {
                     //change indexes in list of army
                     _gameManager.Army1List[tempIndex] = _gameManager.Army1List[tempIndex2];
@@ -81,7 +82,7 @@ public class SwapButtonLogic : MonoBehaviour
             tempIndex2 = FindIndexInList(_gameManager.selectedBoxesList[1]);
             if (_stringForListDetection == "army2")
             {
-                if (!CheckMonstersToSwap(tempIndex, tempIndex2)) //do when only small monsters are selected
+                if (!CheckMonstersToSwap(tempIndex, tempIndex2, _gameManager.Army2List)) //do when only small monsters are selected
                 {
                     //change indexes in list of army
                     _gameManager.Army2List[tempIndex] = _gameManager.Army2List[tempIndex2];
@@ -90,6 +91,7 @@ public class SwapButtonLogic : MonoBehaviour
                     //change gameobject order in list
                     _gameManager.selectedBoxesList[1].transform.SetSiblingIndex(tempIndex);
                     _gameManager.selectedBoxesList[0].transform.SetSiblingIndex(tempIndex2);
+
                 }
                 else //do when Big monster is selected
                 {
@@ -222,16 +224,30 @@ public class SwapButtonLogic : MonoBehaviour
             //move object to their positions
             tempForArmy1.transform.SetSiblingIndex(index2);
             tempForArmy2.transform.SetSiblingIndex(index1);
-        }        
-        else 
+        }
+        else
         {
-            if (tempForArmy1.GetComponent<OnClickHandler>().isBigMonsterHere == true &&
+            if (tempForArmy1.GetComponent<OnClickHandler>().isMonsterHere == true && index1 == 5)
+            {
+                SwapInOneList(list1, index1, index1 - 1);
+
+                tempForArmy1.transform.SetSiblingIndex(index1 - 1);
+                index1 = index1 - 1;
+            }
+            else if (tempForArmy2.GetComponent<OnClickHandler>().isMonsterHere == true && index2 == 5)
+            {
+                SwapInOneList(list2, index2, index2 - 1);
+
+                tempForArmy2.transform.SetSiblingIndex(index2 - 1);
+                index2 = index2 - 1;
+            }
+            else if (tempForArmy1.GetComponent<OnClickHandler>().isBigMonsterHere == true &&
                 tempForArmy2.GetComponent<OnClickHandler>().isBigMonsterHere == false &&
                 list2[index2 + 1].GetComponent<OnClickHandler>().isBigMonsterHere == true) //migration x2 from army1 to army2 without space
             {
-                if(index2 + 3 <= 5) //check if u are still in list indexes
+                if (index2 + 3 <= 5) //check if u are still in list indexes
                 {
-                    if(index2 + 4 <= 5)  //check if the situation is 0 S x2 x2 x1 0 if yes move all one index to the right
+                    if (index2 + 4 <= 5)  //check if the situation is 0 S x2 x2 x1 0 if yes move all one index to the right
                     {
                         SwapInOneList(list2, index2 + 3, index2 + 4);
                     }
@@ -240,7 +256,7 @@ public class SwapButtonLogic : MonoBehaviour
                 }
                 else
                 {
-                    return; 
+                    return;
                 }
             }
             else if (tempForArmy1.GetComponent<OnClickHandler>().isBigMonsterHere == false &&
@@ -290,17 +306,16 @@ public class SwapButtonLogic : MonoBehaviour
                 tempForArmy1.transform.SetSiblingIndex(index2);
                 tempForArmy2.transform.SetSiblingIndex(index1);
         }
+       
         
     }
 
 
-
-    public bool CheckMonstersToSwap(int index1, int index2)
+    //validation for checking if selected monster is x2
+    public bool CheckMonstersToSwap(int index1, int index2, List<GameObject> list)
     {
-        if (_gameManager.Army1List[index1].GetComponent<OnClickHandler>().isBigMonsterHere == true ||
-                _gameManager.Army1List[index2].GetComponent<OnClickHandler>().isBigMonsterHere == true ||
-                _gameManager.Army2List[index1].GetComponent<OnClickHandler>().isBigMonsterHere == true ||
-                _gameManager.Army2List[index2].GetComponent<OnClickHandler>().isBigMonsterHere == true)
+        if (list[index1].GetComponent<OnClickHandler>().isBigMonsterHere == true ||
+                list[index2].GetComponent<OnClickHandler>().isBigMonsterHere == true)
         {
             return true;
         }
